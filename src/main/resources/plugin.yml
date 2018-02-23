@@ -1,0 +1,31 @@
+name: TekkitReference
+main: nl.hypothermic.tekkitreference.trMain
+version: 1.0.0-RELEASE
+author: hypothermicdotnl
+commands:
+   ref:
+      description: Tekkit Reference
+      usage: /ref <search term>
+      permission: tekkitreference.ref
+      permission-message: You don't have permission to use this command
+   docs:
+      description: Tekkit Reference
+      usage: /docs <search term>
+      permission: tekkitreference.docs
+      permission-message: You don't have permission to use this command
+permissions:
+    tekkitreference.*:
+        description: Gives access to all tekkitreference commands
+        children:
+            tekkitreference.ref: true
+            tekkitreference.docs: true
+            tekkitreference.admin: true
+    tekkitreference.ref:
+        description: Allows you to use the ref command
+        default: true
+    tekkitreference.docs:
+        description: Allows you to use the docs command
+        default: true
+    tekkitreference.admin:
+        description: Allows you to use admin features
+        default: op

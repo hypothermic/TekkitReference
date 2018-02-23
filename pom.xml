@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <!-- TekkitReference by Hypothermic, www.github.com/hypothermic, admin@hypothermic.nl -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>nl.hypothermic</groupId>
+  <artifactId>tekkitreference</artifactId>
+  <version>1.0.0-RELEASE</version>
+  <name>TekkitReference</name>
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                  <source>1.7</source>
+                  <target>1.7</target>
+              </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.4</version>
+            <configuration>
+               <descriptorRefs>
+                   <descriptorRef>jar-with-dependencies</descriptorRef>
+               </descriptorRefs>
+            </configuration>
+          </plugin>
+      </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>bukkit</groupId>
+      <artifactId>org.bukkit</artifactId>
+      <version>unofficial-1.2.5-R5.0-hypothermic</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/src/main/resources/bukkit-unofficial-1.2.5-R5.0-hypothermic.jar</systemPath>
+    </dependency>
+  </dependencies>
+</project>
