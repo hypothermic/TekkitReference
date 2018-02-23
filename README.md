@@ -3,7 +3,8 @@
 
 A manual plugin made for Tekkit Classic (3.1.2). Retrieves item information from a MySQL database.
 
-Please report any bugs and issues [here](../../issues/).
+Please report any bugs and issues [here](../../issues/).  
+You can download the JAR [here](../../releases/).
 ### Usage
 **General commands**  
 *Permission: tekkitreference.ref*
