@@ -5,7 +5,7 @@ A manual plugin made for Tekkit Classic (3.1.2). Retrieves item information from
 
 Please report any bugs and issues [here](../../issues/).  
 You can download the JAR [here](../../releases/).
-### Usage
+## Usage
 **General commands**  
 *Permission: tekkitreference.ref*
 - `/ref <item name> [filter]`  
@@ -19,19 +19,22 @@ You can download the JAR [here](../../releases/).
 **Availible filters**
 - `all`
 
-### Setup
+## Setup
+*Note: by default, TekkitReference uses the Public Database. You can change this in the config file.*
+
 1. Download JAR and move it to your `plugins` folder.  
 2. Reload/restart/start your server once to create the config file.  
 
-**Optional steps for better performance:**  
+**Optional: hosting your own database:**  
+
 3. Setup a MySQL server locally and import the database from the .sql file.  
 4. Modify the config.yml to match your MySQL server's settings.  
 5. Reload/restart your server. Check your console if the SQL connection succeeded.
 
-### Changelog
+## Changelog
 **v1.0.0**  
 Initial version
 
-### TODO
+## TODO
 - Item ID as search term
 - Add more items to the database
