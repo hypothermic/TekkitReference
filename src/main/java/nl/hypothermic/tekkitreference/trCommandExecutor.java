@@ -32,11 +32,13 @@ public class trCommandExecutor implements CommandExecutor {
 		this.cl = main;
 		this.sqlconn = conn;
 		this.ver = ver;
+		this.lrefresh = System.currentTimeMillis() / 1000L;
 	}
 	
 	private final trMain cl;
 	private Connection sqlconn;
 	private String ver;
+	private long lrefresh;
 	
 	@Override public boolean onCommand(final CommandSender sender, Command cmd, String label, final String[] args) {
 		if (// aliases
@@ -63,6 +65,7 @@ public class trCommandExecutor implements CommandExecutor {
 				} else {
 					searchparam = "" + ((Player) sender).getInventory().getItemInHand().getTypeId();
 				}
+				cl.getLogger().info("debug: " + ((Player) sender).getInventory().getItemInHand().getData().getData());
 				column = 1;
 			}
 		}
@@ -71,11 +74,12 @@ public class trCommandExecutor implements CommandExecutor {
 				sender.sendMessage("You must be a player to use this command");
 				return false;
 			} else {
-				if (((Player) sender).getInventory().getItemInHand().getData().getData() != 0) {
+				if (((Player) sender).getTargetBlock(null, 100).getData() != 0) {
 					searchparam = ((Player) sender).getTargetBlock(null, 100).getTypeId() + ":" + ((Player) sender).getTargetBlock(null, 100).getData();
 				} else {
 					searchparam = "" + ((Player) sender).getTargetBlock(null, 100).getTypeId();
 				}
+				cl.getLogger().info("debug: " + ((Player) sender).getTargetBlock(null, 100).getData());
 				column = 1;
 			}
 		}
@@ -95,8 +99,10 @@ public class trCommandExecutor implements CommandExecutor {
 								cl.getConfig().getString("mysql-database"), 
 								cl.getConfig().getString("mysql-user") , 
 								cl.getConfig().getString("mysql-password"));
+						cl.getLogger().info("Reload issued by " + sender.getName() + " was successful.");
 						sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Successfully reconnected to database.");
 					} catch (SQLException e) {
+						cl.getLogger().severe("Reload issued by " + sender.getName() + ": Could not connect to database.");
 						sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.RED + " Error: Could not connect to database!");
 						e.printStackTrace();
 					}
@@ -117,6 +123,7 @@ public class trCommandExecutor implements CommandExecutor {
 			String[] s = args[0].split(":");
 			if (s.length != 2 || s[0] == null || s[0] == "" || s[1] == null || s[1] == "") {
 				sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Example: /ref 150:8");
+				return true;
 			}
 			column = 1;
 			searchparam = args[0].trim();
@@ -135,6 +142,25 @@ public class trCommandExecutor implements CommandExecutor {
 		final int xfilter = filter;
 		final String xsearchparam = searchparam;
 		final int xcolumn = column;
+		Bukkit.getLogger().info("debug 0");
+		final boolean c = cl.getConfig().getBoolean("mute-console-output");
+		try {
+			if (sqlconn.isClosed()) {
+				if (c) cl.getLogger().info("Connection to MySQL database is closed. Re-connecting...");
+				sqlconn = cl.connect();
+				if (c) cl.getLogger().info("Connected.");
+			}
+			if ((lrefresh + cl.getConfig().getLong("mysql-session-timeout")) < System.currentTimeMillis() / 1000L) {
+				if (c) cl.getLogger().info("Refresh time has been reached. Re-connecting... " + (lrefresh + cl.getConfig().getLong("mysql-session-timeout")) + " X " + System.currentTimeMillis() / 1000L);
+				lrefresh = System.currentTimeMillis() / 1000L;
+	    		sqlconn = cl.connect();
+	    		if (c) cl.getLogger().info("Connected.");
+	    	}
+		} catch (SQLException e) {
+			sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " An error occurred. Please notify the server administrator.");
+			cl.getLogger().info("Exception happened while trying to reconnect.");
+			e.printStackTrace();
+		}
 		final Connection xconnection = sqlconn;
 		new Thread(new Runnable() {
         	private String format(String searchparam) {
@@ -149,10 +175,6 @@ public class trCommandExecutor implements CommandExecutor {
         	}
         	
             public void run() { try {
-            	if (xconnection.isClosed()) {
-            		Bukkit.getLogger().severe("Connection to MySQL database is closed. Re-connecting...");
-            		return;
-            	}
             	PreparedStatement stmt;
             	if (xcolumn == 0) {
             		stmt = xconnection.prepareStatement("SELECT * FROM `refs` WHERE `name` = ?");
@@ -163,6 +185,7 @@ public class trCommandExecutor implements CommandExecutor {
             		stmt = xconnection.prepareStatement("SELECT * FROM `refs` WHERE `name` = ?");
             	}
             	stmt.setString(1, format(xsearchparam.replaceAll("_", " ")));
+            	stmt.setQueryTimeout(cl.getConfig().getInt("mysql-query-timeout"));
             	ResultSet rs = stmt.executeQuery();
             	String name = null;
             	String id = null;
@@ -203,9 +226,15 @@ public class trCommandExecutor implements CommandExecutor {
             		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Example: ./ref retriever");
             		return;
             	}
+            	String xemc;
+  		  		if (emc == null || emc == "null") {
+  		  			xemc = "unknown";
+  		  		} else {
+  		  			xemc = emc;
+  		  		}
             	// Display results depending on filter
       		  	if (xfilter == 0) {
-      		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + emc + " EMC]");
+      		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + xemc + " EMC]");
       		  		sender.sendMessage(ChatColor.GREEN + "Mod: " + ChatColor.WHITE + xmod);
       		  		sender.sendMessage(ChatColor.GREEN + "Type: " + ChatColor.WHITE + type);
       		  		sender.sendMessage(ChatColor.GREEN + "Max stack: " + ChatColor.WHITE + maxstack);
@@ -241,7 +270,7 @@ public class trCommandExecutor implements CommandExecutor {
       		  				} else if (icrequireeu.contains("G")) {
       		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates EU");
       		  				} else if (icrequireeu.contains("S")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max." + icholdeu + " EU");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max. " + icholdeu + " EU");
       		  				} else if (icrequireeu.contains("T")) {
       		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Transfers EU");
       		  				} else {
@@ -250,7 +279,7 @@ public class trCommandExecutor implements CommandExecutor {
       		  			}
       		  		}
     		  	} else if (xfilter == 1) {
-    		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + emc + " EMC]");
+    		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + xemc + " EMC]");
       		  		sender.sendMessage(ChatColor.GREEN + "Mod: " + ChatColor.WHITE + xmod);
       		  		sender.sendMessage(ChatColor.GREEN + "Type: " + ChatColor.WHITE + type);
       		  		sender.sendMessage(ChatColor.GREEN + "Max stack: " + ChatColor.WHITE + maxstack);

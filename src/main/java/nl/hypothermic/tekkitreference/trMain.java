@@ -33,11 +33,12 @@ public class trMain extends JavaPlugin {
 	*---------= 21/02/2018 =---------*
 	\********************************/
 	
-	private Connection connect() {
+	protected Connection connect() {
 		Connection sqlconn;
 		try {
+			if (getConfig().getBoolean("mute-console-output"));
 			getLogger().info("Connecting to database. This should not take more than 5 seconds. Timeout is 2 minutes.");
-			DriverManager.setLoginTimeout(10);
+			DriverManager.setLoginTimeout(getConfig().getInt("mysql-connect-timeout"));
 			sqlconn = DriverManager.getConnection("jdbc:mysql://" + getConfig().getString("mysql-server") + "/" + 
 																	getConfig().getString("mysql-database"), 
 																	getConfig().getString("mysql-user") , 
@@ -84,6 +85,10 @@ public class trMain extends JavaPlugin {
 	    cfg.addDefault("mysql-database", "tekkitreference");
 	    cfg.addDefault("mysql-user", "tekkitreference");
 	    cfg.addDefault("mysql-password", "$publicdatabase");
+	    cfg.addDefault("mysql-connect-timeout", 20);
+	    cfg.addDefault("mysql-query-timeout", 10);
+	    cfg.addDefault("mysql-session-timeout", 120L);
+	    cfg.addDefault("mute-console-output", false);
 	    cfg.options().copyDefaults(true);
 	    saveConfig();
 	    if (xs) {
@@ -101,7 +106,9 @@ public class trMain extends JavaPlugin {
 	    	FileOutputStream fos = new FileOutputStream(f);
 	    	fos.write(result.getBytes());
 	    	fos.flush();
+	    	fos.close();
 	    	getLogger().info("A new configuration file has been written.");
+	    	br.close();
 	    }
 	}
 	
