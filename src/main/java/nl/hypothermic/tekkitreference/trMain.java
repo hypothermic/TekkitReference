@@ -40,12 +40,12 @@ public class trMain extends JavaPlugin {
 			getLogger().severe("Could not write config file correctly.");
 			e1.printStackTrace();
 		}
-		SwingUtilities.invokeLater(new Runnable() {
+		/*comment: v1.1.0 // SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
 		    	// init jfx service platform
 		    	new JFXPanel();
 		    }
-		});
+		});*/
 		Connection sqlconn;
 		try {
 			getLogger().info("Connecting to database. This should not take more than 5 seconds. Timeout is 2 minutes.");

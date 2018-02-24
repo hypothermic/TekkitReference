@@ -9,6 +9,7 @@ You can download the JAR [here](../../releases/).
 **General commands**  
 *Permission: tekkitreference.ref*
 - `/ref <item name> [filter]`  
+- `/ref <item id> [filter]`  
 - `/ref look`  
 - `/ref hand`  
 
@@ -32,9 +33,13 @@ You can download the JAR [here](../../releases/).
 5. Reload/restart your server. Check your console if the SQL connection succeeded.
 
 ## Changelog
+**v1.1.0**
+- Removed JFX toolkit and Services, plugin now works for CLI-only machines
+- Added Item ID as search term
+
 **v1.0.0**  
-Initial version
+- Initial version
 
 ## TODO
-- Item ID as search term
+- ~~Item ID as search term~~
 - Add more items to the database

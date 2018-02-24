@@ -1,6 +1,11 @@
 package nl.hypothermic.tekkitreference;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Scanner;
 
 import javax.swing.SwingUtilities;
 
@@ -82,6 +87,16 @@ public class trCommandExecutor implements CommandExecutor {
 			sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Usage: /ref admin <command>");
 			return true;
 		}
+		if (args[0].contains(":")) {
+			String[] s = args[0].split(":");
+			if (s.length != 2 || s[0] == null || s[0] == "" || s[1] == null || s[1] == "") {
+				sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Example: /ref 150:8");
+			}
+			Bukkit.getLogger().info("debug s: " + Arrays.toString(s));
+			Bukkit.getLogger().info("debug searchparam: " + args[0].trim());
+			column = 1;
+			searchparam = args[0].trim();
+		}
 		int filter = 0;
 		if (args.length == 2) {
 			if (args[1].contains("all")) {
@@ -92,21 +107,173 @@ public class trCommandExecutor implements CommandExecutor {
 		final int xfilter = filter;
 		final String xsearchparam = searchparam;
 		final int xcolumn = column;
-		SwingUtilities.invokeLater(new Runnable() {
-		    public void run() {
-		    	Bukkit.getLogger().info("Querying=" + xsearchparam + " with filter=" + xfilter + " with column=" + xcolumn);
-				final trDatabaseQueryService srv = new trDatabaseQueryService(sqlconn, xsearchparam, sender, xfilter, xcolumn);
-				srv.setOnFailed(new EventHandler<WorkerStateEvent>() {
-		            public void handle(WorkerStateEvent workerStateEvent) {
-		            	sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " An error occurred. Please contact the server administrator.");
-		            	cl.getLogger().severe("Exception happened in DB Query Service: " + srv.getException().getMessage());
-		            	cl.getLogger().severe("Check your connection to the MySQL database and reload the plugin. If you believe this is an error in the plugin, message the author (see readme)");
-		            	cl.error("Exception happened in DB Query Service: " + srv.getException() + "\n" + srv.getException().getStackTrace());
-		            }
-		        });
-				srv.restart();
-		    }
-		});
+		final Connection xconnection = sqlconn;
+		new Thread(new Runnable() {
+        	private String format(String searchparam) {
+        		String out = ""; 
+        	    Scanner l = new Scanner(searchparam); 
+        	    while(l.hasNext()) {
+        	    	String word = l.next(); 
+        	    	out += Character.toUpperCase(word.charAt(0)) + word.substring(1) + " "; 
+        	    }
+        	    return out.trim();
+        	}
+        	
+            public void run() { try {
+            	PreparedStatement stmt;
+            	if (xcolumn == 0) {
+            		stmt = xconnection.prepareStatement("SELECT * FROM `refs` WHERE `name` = ?");
+            	} else if (xcolumn == 1) {
+            		stmt = xconnection.prepareStatement("SELECT * FROM `refs` WHERE `id` = ?");
+            	} else {
+            		Bukkit.getLogger().severe("Could not detect search column, searching in 'name'.");
+            		stmt = xconnection.prepareStatement("SELECT * FROM `refs` WHERE `name` = ?");
+            	}
+            	stmt.setString(1, format(xsearchparam.replaceAll("_", " ")));
+            	ResultSet rs = stmt.executeQuery();
+            	String name = null;
+            	String id = null;
+            	String emc = null;
+            	String xmod = null;
+            	String type = null;
+            	String maxstack = null;
+            	String sidein = null;
+            	String sideout = null;
+            	String sidepwd = null;
+            	String emitlight = null;
+            	String passlight = null;
+            	String icmaxcurrent = null;
+            	String icrequireeu = null;
+            	String icholdeu = null;
+            	String rprequirebt = null;
+            	String passsun = null;
+            	while (rs.next()) {
+            		name = rs.getString("name");
+            		id = rs.getString("id");
+            		emc = rs.getString("emc");
+            		xmod = rs.getString("xmod");
+            		type = rs.getString("type");
+            		maxstack = rs.getString("maxstack");
+            		sidein = rs.getString("sidein");
+            		sideout = rs.getString("sideout");
+            		sidepwd = rs.getString("sidepwd");
+            		emitlight = rs.getString("emitlight");
+            		passlight = rs.getString("passlight");
+            		icmaxcurrent = rs.getString("icmaxcurrent");
+            		icrequireeu = rs.getString("icrequireeu");
+            		icholdeu = rs.getString("icholdeu");
+            		rprequirebt = rs.getString("rprequirebt");
+            		passsun = rs.getString("passsun");
+            	}
+            	if (name == null) {
+            		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Could not find that item in the database.");
+            		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Example: ./ref retriever");
+            		return;
+            	}
+            	// Display results depending on filter
+      		  	if (xfilter == 0) {
+      		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + emc + " EMC]");
+      		  		sender.sendMessage(ChatColor.GREEN + "Mod: " + ChatColor.WHITE + xmod);
+      		  		sender.sendMessage(ChatColor.GREEN + "Type: " + ChatColor.WHITE + type);
+      		  		sender.sendMessage(ChatColor.GREEN + "Max stack: " + ChatColor.WHITE + maxstack);
+      		  		if (type.toLowerCase().contains("Machine".toLowerCase())) {
+      		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + sidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + sideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + sidepwd);
+      		  			if (xmod.toLowerCase().contains("redpower2")) {
+      		  				if (rprequirebt.contains("Y")) {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Requires blutricity");
+      		  				} else if (rprequirebt.contains("G")) {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates blutricity");
+      		  				} else if (rprequirebt.contains("S")) {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores blutricity");
+      		  				} else if (rprequirebt.contains("T")) {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Transfers blutricity");
+      		  				} else {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Does not use blutricity");
+      		  				}
+      		  			} else if (xmod.toLowerCase().contains("industrialcraft2")) {
+      		  				if (icrequireeu.contains("Y")) {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Requires EU");
+      		  				} else if (icrequireeu.contains("G")) {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates EU");
+      		  				} else if (icrequireeu.contains("S")) {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max." + icholdeu + " EU");
+      		  				} else if (icrequireeu.contains("T")) {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Transfers EU");
+      		  				} else {
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Does not use EU");
+      		  				}
+      		  			}
+      		  		}
+    		  	} else if (xfilter == 1) {
+    		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + emc + " EMC]");
+      		  		sender.sendMessage(ChatColor.GREEN + "Mod: " + ChatColor.WHITE + xmod);
+      		  		sender.sendMessage(ChatColor.GREEN + "Type: " + ChatColor.WHITE + type);
+      		  		sender.sendMessage(ChatColor.GREEN + "Max stack: " + ChatColor.WHITE + maxstack);
+      		  		try {
+      		  		if (!sidein.isEmpty()) {
+      		  			sender.sendMessage(ChatColor.GREEN + "Item input side: " + ChatColor.WHITE + sidein);
+      		  		} else {
+	  					sender.sendMessage(ChatColor.GRAY + "Does not accept items. ");
+	  				}} catch (NullPointerException x) {}
+      		  		try {
+      		  		if (!sideout.isEmpty()) {
+	  					sender.sendMessage(ChatColor.GREEN + "Item outputside : " + ChatColor.WHITE + sideout);
+	  				} else {
+	  					sender.sendMessage(ChatColor.GRAY + "Does not output items. ");
+	  				}} catch (NullPointerException x) {}
+      		  		try {
+	  				if (!sidepwd.isEmpty()) {
+	  					sender.sendMessage(ChatColor.GREEN + "Power side: " + ChatColor.WHITE + sidepwd);
+	  				} else {
+	  					sender.sendMessage(ChatColor.GRAY + "Does not accept power. ");
+	  				}} catch (NullPointerException x) {}
+	  				try {
+      		  		if (rprequirebt.contains("Y")) {
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Requires blutricity");
+	  				} else if (rprequirebt.contains("G")) {
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Generates blutricity");
+	  				} else if (rprequirebt.contains("S")) {
+		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Stores blutricity");
+		  			} else if (rprequirebt.contains("T")) {
+		  			// 'only' because all machines which use blutricity transmit it
+		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Only transfers blutricity");
+		  			} else {
+	  					sender.sendMessage(ChatColor.GRAY + "- Does not use blutricity");
+	  				}} catch (NullPointerException x) { sender.sendMessage(ChatColor.GRAY + "- Does not use blutricity"); }
+      		  		try {
+		  			if (icrequireeu.contains("Y")) {
+  		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Requires EU");
+  		  			} else if (icrequireeu.contains("G")) {
+  		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Generates EU");
+  		  			} else if (icrequireeu.contains("S")) {
+		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Stores max." + icholdeu + " EU");
+		  			} else if (icrequireeu.contains("T")) {
+		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Transfers EU");
+		  			} else {
+  		  				sender.sendMessage(ChatColor.GRAY + "- Does not use EU");
+  		  			}} catch (NullPointerException x) { sender.sendMessage(ChatColor.GRAY + "- Does not use EU"); }
+      		  		try {
+		  			if (emitlight.contains("Y")) {
+		  				sender.sendMessage(ChatColor.YELLOW + "- Emits light");
+		  			} else {
+		  				sender.sendMessage(ChatColor.GRAY + "- Does not emit light");
+		  			}} catch (NullPointerException x) {}
+      		  		try {
+		  			if (passlight.contains("Y")) {
+		  				sender.sendMessage(ChatColor.YELLOW + "- Light can pass through block");
+		  			} else {
+		  				sender.sendMessage(ChatColor.GRAY + "- Light can't pass through block");
+		  			}} catch (NullPointerException x) {}
+      		  		try {
+		  			if (passsun.contains("Y")) {
+		  				sender.sendMessage(ChatColor.YELLOW + "- Sunlight can pass through block");
+		  			} else {
+		  				sender.sendMessage(ChatColor.GRAY + "- Sunlight can't pass through block");
+		  			}} catch (NullPointerException x) {}
+    		  	}
+				return;
+            } catch (Exception x) {}
+		}}).start();
 		return true;
 	}
 }
