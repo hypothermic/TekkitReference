@@ -16,6 +16,7 @@ You can download the JAR [here](../../releases/).
 **Administrator commands**  
 *Permission: tekkitreference.admin*
 - `/ref admin reload`  
+- `/ref admin info`
 
 **Availible filters**
 - `all`
@@ -33,12 +34,18 @@ You can download the JAR [here](../../releases/).
 5. Reload/restart your server. Check your console if the SQL connection succeeded.
 
 ## Changelog
+**v1.2.0**
+- Fixed search for items without data (ex. 151).
+- Created seperate functionn for connecting to DB.
+- Admin reload command now forces reconnect to DB.
+- Replaces *null* with *N/A* in output.
+
 **v1.1.0**
-- Removed JFX toolkit and Services, plugin now works for CLI-only machines
-- Added Item ID as search term
+- Removed JFX toolkit and Services, plugin now works for CLI-only machines.
+- Added Item ID as search term.
 
 **v1.0.0**  
-- Initial version
+- Initial version.
 
 ## TODO
 - ~~Item ID as search term~~

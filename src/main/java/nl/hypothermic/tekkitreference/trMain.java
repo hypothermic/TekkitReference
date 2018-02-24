@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,11 +17,11 @@ import java.sql.SQLException;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import javafx.embed.swing.JFXPanel;
 
 public class trMain extends JavaPlugin {
 	
@@ -32,20 +33,7 @@ public class trMain extends JavaPlugin {
 	*---------= 21/02/2018 =---------*
 	\********************************/
 	
-	@Override public void onEnable() {
-		try {
-			boolean xs = new File(getDataFolder().getPath() + File.separator + "config.yml").exists();
-			defconfig(getConfig(), !xs);
-		} catch (IOException e1) {
-			getLogger().severe("Could not write config file correctly.");
-			e1.printStackTrace();
-		}
-		/*comment: v1.1.0 // SwingUtilities.invokeLater(new Runnable() {
-		    public void run() {
-		    	// init jfx service platform
-		    	new JFXPanel();
-		    }
-		});*/
+	private Connection connect() {
 		Connection sqlconn;
 		try {
 			getLogger().info("Connecting to database. This should not take more than 5 seconds. Timeout is 2 minutes.");
@@ -54,21 +42,39 @@ public class trMain extends JavaPlugin {
 																	getConfig().getString("mysql-database"), 
 																	getConfig().getString("mysql-user") , 
 																	getConfig().getString("mysql-password"));
+			return sqlconn;
 		} catch (SQLException e) {
 			getLogger().severe("[ERROR] TekkitReference could not be enabled: Connection to sql failed. Possible solutions: ");
 			getLogger().severe("[ERROR] 1) Check your server address in config file");
 			getLogger().severe("[ERROR] 2) Check if SQL drivers are installed (if needed)");
 			getLogger().severe("[ERROR] 3) Check that the server is accessible");
+			return null;
+		}
+	}
+	
+	@Override public void onEnable() {
+		loadVer();
+		try {
+			boolean xs = new File(getDataFolder().getPath() + File.separator + "config.yml").exists();
+			defconfig(getConfig(), !xs);
+		} catch (IOException e1) {
+			getLogger().severe("Could not write config file correctly.");
+			e1.printStackTrace();
+		}
+		Connection sqlconn = connect();
+		if (sqlconn == null) {
 			return;
 		}
-		this.getCommand("ref").setExecutor(new trCommandExecutor(this, sqlconn));
-		this.getCommand("docs").setExecutor(new trCommandExecutor(this, sqlconn));
-		getLogger().info("TekkitReference has been enabled.");
+		this.getCommand("ref").setExecutor(new trCommandExecutor(this, sqlconn, v));
+		this.getCommand("docs").setExecutor(new trCommandExecutor(this, sqlconn,v));
+		getLogger().info("TekkitReference " + v + " has been enabled.");
 	}
 
 	@Override public void onDisable() {
 		getLogger().info("TekkitReference has been disabled.");
 	}
+	
+	private String v;
 	
 	public void defconfig(FileConfiguration cfg, Boolean xs) throws IOException {
 		if (!getDataFolder().exists()) {
@@ -88,7 +94,7 @@ public class trMain extends JavaPlugin {
 	    	while( (line = br.readLine()) != null){
 	    		result = result + line + "\n"; 
 	    	}
-	    	result =  "# ---------- TekkitReference Configuration File ----------\n"
+	    	result =  "# ----- TekkitReference Configuration (v" + v + ")-----\n"
 	    			+ "# The default mysql settings are for the Public Database\n"
 	    			+ "# which is hosted on ext1.hypothermic.nl. It's recommended\n"
 	    			+ "# that you host your own database for better performance.\n" + result;
@@ -97,6 +103,17 @@ public class trMain extends JavaPlugin {
 	    	fos.flush();
 	    	getLogger().info("A new configuration file has been written.");
 	    }
+	}
+	
+	public void loadVer() {
+		try {
+			v = this.getDescription().getVersion();
+		} catch (Exception x) {
+			v = "[unknown]";
+		}
+		if (v == null) {
+			v = "[unknown]";
+		}
 	}
 	
     public void error(String message) {

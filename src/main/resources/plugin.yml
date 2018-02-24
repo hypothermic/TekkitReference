@@ -1,6 +1,6 @@
 name: TekkitReference
 main: nl.hypothermic.tekkitreference.trMain
-version: 1.0.0-RELEASE
+version: 1.2.0-RELEASE
 author: hypothermicdotnl
 commands:
    ref:

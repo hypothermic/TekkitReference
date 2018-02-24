@@ -1,8 +1,10 @@
 package nl.hypothermic.tekkitreference;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -16,10 +18,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import javafx.concurrent.WorkerStateEvent;
-import javafx.embed.swing.JFXPanel;
-import javafx.event.EventHandler;
-
 public class trCommandExecutor implements CommandExecutor {
 	
 	/********************************\
@@ -30,13 +28,15 @@ public class trCommandExecutor implements CommandExecutor {
 	*---------= 21/02/2018 =---------*
 	\********************************/
 
-	public trCommandExecutor(trMain main, Connection conn) {
+	public trCommandExecutor(trMain main, Connection conn, String ver) {
 		this.cl = main;
 		this.sqlconn = conn;
+		this.ver = ver;
 	}
 	
 	private final trMain cl;
 	private Connection sqlconn;
+	private String ver;
 	
 	@Override public boolean onCommand(final CommandSender sender, Command cmd, String label, final String[] args) {
 		if (// aliases
@@ -58,7 +58,11 @@ public class trCommandExecutor implements CommandExecutor {
 				sender.sendMessage("You must be a player to use this command");
 				return false;
 			} else {
-				searchparam = ((Player) sender).getInventory().getItemInHand().getTypeId() + ":" + ((Player) sender).getInventory().getItemInHand().getData().getData();
+				if (((Player) sender).getInventory().getItemInHand().getData().getData() != 0) {
+					searchparam = ((Player) sender).getInventory().getItemInHand().getTypeId() + ":" + ((Player) sender).getInventory().getItemInHand().getData().getData();
+				} else {
+					searchparam = "" + ((Player) sender).getInventory().getItemInHand().getTypeId();
+				}
 				column = 1;
 			}
 		}
@@ -67,7 +71,11 @@ public class trCommandExecutor implements CommandExecutor {
 				sender.sendMessage("You must be a player to use this command");
 				return false;
 			} else {
-				searchparam = ((Player) sender).getTargetBlock(null, 100).getTypeId() + ":" + ((Player) sender).getTargetBlock(null, 100).getData();
+				if (((Player) sender).getInventory().getItemInHand().getData().getData() != 0) {
+					searchparam = ((Player) sender).getTargetBlock(null, 100).getTypeId() + ":" + ((Player) sender).getTargetBlock(null, 100).getData();
+				} else {
+					searchparam = "" + ((Player) sender).getTargetBlock(null, 100).getTypeId();
+				}
 				column = 1;
 			}
 		}
@@ -79,7 +87,24 @@ public class trCommandExecutor implements CommandExecutor {
 			if (args.length == 2) {
 				if (args[1].contains("reload")) {
 					cl.reloadConfig();
-					sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Configuration has been reloaded.");
+					sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Configuration has been reloaded, now reconnecting to database...");
+					try {
+						sqlconn.close();
+						DriverManager.setLoginTimeout(10);
+						sqlconn = DriverManager.getConnection("jdbc:mysql://" + cl.getConfig().getString("mysql-server") + "/" + 
+								cl.getConfig().getString("mysql-database"), 
+								cl.getConfig().getString("mysql-user") , 
+								cl.getConfig().getString("mysql-password"));
+						sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Successfully reconnected to database.");
+					} catch (SQLException e) {
+						sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.RED + " Error: Could not connect to database!");
+						e.printStackTrace();
+					}
+					return true;
+				}
+				if (args[1].contains("info")) {
+					sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " TekkitReference " + ver + " by Hypothermic");
+					sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " www.github.com/hypothermic/tekkitreference");
 					return true;
 				}
 				// more cmds
@@ -87,13 +112,16 @@ public class trCommandExecutor implements CommandExecutor {
 			sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Usage: /ref admin <command>");
 			return true;
 		}
+		// ex: 151:2
 		if (args[0].contains(":")) {
 			String[] s = args[0].split(":");
 			if (s.length != 2 || s[0] == null || s[0] == "" || s[1] == null || s[1] == "") {
 				sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Example: /ref 150:8");
 			}
-			Bukkit.getLogger().info("debug s: " + Arrays.toString(s));
-			Bukkit.getLogger().info("debug searchparam: " + args[0].trim());
+			column = 1;
+			searchparam = args[0].trim();
+		//ex 151
+		} else if (args[0].replaceAll("\\D", "  ").length() == args[0].length()) {
 			column = 1;
 			searchparam = args[0].trim();
 		}
@@ -116,10 +144,15 @@ public class trCommandExecutor implements CommandExecutor {
         	    	String word = l.next(); 
         	    	out += Character.toUpperCase(word.charAt(0)) + word.substring(1) + " "; 
         	    }
+        	    l.close();
         	    return out.trim();
         	}
         	
             public void run() { try {
+            	if (xconnection.isClosed()) {
+            		Bukkit.getLogger().severe("Connection to MySQL database is closed. Re-connecting...");
+            		return;
+            	}
             	PreparedStatement stmt;
             	if (xcolumn == 0) {
             		stmt = xconnection.prepareStatement("SELECT * FROM `refs` WHERE `name` = ?");
@@ -177,7 +210,19 @@ public class trCommandExecutor implements CommandExecutor {
       		  		sender.sendMessage(ChatColor.GREEN + "Type: " + ChatColor.WHITE + type);
       		  		sender.sendMessage(ChatColor.GREEN + "Max stack: " + ChatColor.WHITE + maxstack);
       		  		if (type.toLowerCase().contains("Machine".toLowerCase())) {
-      		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + sidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + sideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + sidepwd);
+      		  			String xsidein = sidein;
+      		  			String xsideout = sideout;
+      		  			String xsidepwd = sidepwd;
+      		  			if (xsidein == null || xsidein == "null") {
+      		  				xsidein = "N/A";
+      		  			}
+      		  			if (xsideout == null || xsideout == "null") {
+      		  				xsideout = "N/A";
+      		  			}
+      		  			if (xsidepwd == null || xsidepwd == "null") {
+      		  				xsidepwd = "N/A";
+      		  			}
+      		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + xsidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + xsideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + xsidepwd);
       		  			if (xmod.toLowerCase().contains("redpower2")) {
       		  				if (rprequirebt.contains("Y")) {
       		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Requires blutricity");
