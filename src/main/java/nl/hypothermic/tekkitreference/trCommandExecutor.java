@@ -11,12 +11,16 @@ import java.util.Scanner;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class trCommandExecutor implements CommandExecutor {
 	
@@ -39,6 +43,11 @@ public class trCommandExecutor implements CommandExecutor {
 	private Connection sqlconn;
 	private String ver;
 	private long lrefresh;
+	protected int[] disableditems = new int[] {136};
+	
+	public boolean contains(int[] array, int key) {
+	    return Arrays.toString(array).matches(".*[\\[ ]" + key + "[\\],].*");
+	}
 	
 	@Override public boolean onCommand(final CommandSender sender, Command cmd, String label, final String[] args) {
 		if (// aliases
@@ -58,28 +67,36 @@ public class trCommandExecutor implements CommandExecutor {
 		if (args[0].contains("hand")) {
 			if (!(sender instanceof Player)) {
 				sender.sendMessage("You must be a player to use this command");
-				return false;
+				return true;
 			} else {
-				if (((Player) sender).getInventory().getItemInHand().getData().getData() != 0) {
-					searchparam = ((Player) sender).getInventory().getItemInHand().getTypeId() + ":" + ((Player) sender).getInventory().getItemInHand().getData().getData();
-				} else {
-					searchparam = "" + ((Player) sender).getInventory().getItemInHand().getTypeId();
+				ItemStack x = ((Player) sender).getInventory().getItemInHand();
+				if (contains(disableditems, x.getData().getItemTypeId())) {
+					sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " This item can only be looked up using item id or name.");
+					return true;
 				}
-				cl.getLogger().info("debug: " + ((Player) sender).getInventory().getItemInHand().getData().getData());
+				if (x.getData().getData() != 0) {
+					searchparam = (x.getTypeId() + ":" + x.getData().getData());
+				} else {
+					searchparam = "" + x.getTypeId();
+				}
 				column = 1;
 			}
 		}
 		if (args[0].contains("look")) {
 			if (!(sender instanceof Player)) {
 				sender.sendMessage("You must be a player to use this command");
-				return false;
+				return true;
 			} else {
-				if (((Player) sender).getTargetBlock(null, 100).getData() != 0) {
-					searchparam = ((Player) sender).getTargetBlock(null, 100).getTypeId() + ":" + ((Player) sender).getTargetBlock(null, 100).getData();
-				} else {
-					searchparam = "" + ((Player) sender).getTargetBlock(null, 100).getTypeId();
+				Block x = ((Player) sender).getTargetBlock(null, 100);
+				if (contains(disableditems, x.getTypeId())) {
+					sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " This item can only be looked up using item id or name.");
+					return true;
 				}
-				cl.getLogger().info("debug: " + ((Player) sender).getTargetBlock(null, 100).getData());
+				if (x.getData() != 0) {
+					searchparam = x.getTypeId() + ":" + x.getData();
+				} else {
+					searchparam = "" + x.getTypeId();
+				}
 				column = 1;
 			}
 		}
