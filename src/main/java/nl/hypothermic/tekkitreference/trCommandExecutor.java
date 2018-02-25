@@ -314,7 +314,7 @@ public class trCommandExecutor implements CommandExecutor {
       		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Stores max. " + eeemcstor + " EMC");
       		  			}
       		  			if (eeemcbonus != null) {
-      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Gives " + eeemcbonus + " EMC bonus per attached side.");
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Gives " + eeemcbonus + " EMC bonus per attached side");
       		  			}
       		  		} else if (type.contains("Furnace")) {
       		  			String xsidein = sidein;
@@ -354,7 +354,7 @@ public class trCommandExecutor implements CommandExecutor {
       		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Can operate on EMC");
       		  			}} catch (NullPointerException x) {}
       		  			if (!storcapacity.isEmpty()) {
-      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Item capacity: " + storcapacity);
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Item capacity: " + storcapacity + " stacks");
       		  			}
       		  		}
     		  	} else if (xfilter == 1) {
@@ -362,30 +362,27 @@ public class trCommandExecutor implements CommandExecutor {
       		  		sender.sendMessage(ChatColor.GREEN + "Mod: " + ChatColor.WHITE + xmod);
       		  		sender.sendMessage(ChatColor.GREEN + "Type: " + ChatColor.WHITE + type);
       		  		sender.sendMessage(ChatColor.GREEN + "Max stack: " + ChatColor.WHITE + maxstack);
-      		  		try {
-      		  		if (!sidein.isEmpty()) {
+      		  		if (sidein != null) {
       		  			sender.sendMessage(ChatColor.GREEN + "Item input side: " + ChatColor.WHITE + sidein);
       		  		} else {
-	  					sender.sendMessage(ChatColor.GRAY + "Does not accept items. ");
-	  				}} catch (NullPointerException x) {}
-      		  		try {
-      		  		if (!sidefuel.isEmpty()) {
-      		  			sender.sendMessage(ChatColor.GREEN + "Fuel input side: " + ChatColor.WHITE + sidein);
+	  					sender.sendMessage(ChatColor.GRAY + "Does not accept items ");
+      		  		}
+      		  		if (sidefuel != null) {
+      		  			sender.sendMessage(ChatColor.GREEN + "Fuel input side: " + ChatColor.WHITE + sidefuel);
       		  		} else {
-	  					sender.sendMessage(ChatColor.GRAY + "Does not require fuel. ");
-	  				}} catch (NullPointerException x) {}
-      		  		try {
-      		  		if (!sideout.isEmpty()) {
-	  					sender.sendMessage(ChatColor.GREEN + "Item output side : " + ChatColor.WHITE + sideout);
+	  					sender.sendMessage(ChatColor.GRAY + "Does not require fuel");
+      		  		}
+      		  		if (sideout != null) {
+	  					sender.sendMessage(ChatColor.GREEN + "Item output side: " + ChatColor.WHITE + sideout);
 	  				} else {
-	  					sender.sendMessage(ChatColor.GRAY + "Does not output items. ");
-	  				}} catch (NullPointerException x) {}
-      		  		try {
-	  				if (!sidepwd.isEmpty()) {
+	  					sender.sendMessage(ChatColor.GRAY + "Does not output items");
+	  				}
+	  				if (sidepwd != null) {
 	  					sender.sendMessage(ChatColor.GREEN + "Power side: " + ChatColor.WHITE + sidepwd);
 	  				} else {
-	  					sender.sendMessage(ChatColor.GRAY + "Does not accept power. ");
-	  				}} catch (NullPointerException x) {}
+	  					sender.sendMessage(ChatColor.GRAY + "Does not accept power");
+	  				}
+	  				// try-catching is faster than checking if rprequirebt is null
 	  				try {
       		  		if (rprequirebt.contains("Y")) {
 	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Requires blutricity");
@@ -411,56 +408,48 @@ public class trCommandExecutor implements CommandExecutor {
 		  			} else {
   		  				sender.sendMessage(ChatColor.GRAY + "- Does not use EU");
   		  			}} catch (NullPointerException x) { sender.sendMessage(ChatColor.GRAY + "- Does not use EU"); }
-      		  		try {
-		  			if (emitlight.contains("Y")) {
+		  			if (emitlight != null && emitlight.contains("Y")) {
 		  				sender.sendMessage(ChatColor.YELLOW + "- Emits light");
 		  			} else {
 		  				sender.sendMessage(ChatColor.GRAY + "- Does not emit light");
-		  			}} catch (NullPointerException x) {}
-      		  		try {
-		  			if (passlight.contains("Y")) {
+		  			}
+		  			if (passlight != null && passlight.contains("Y")) {
 		  				sender.sendMessage(ChatColor.YELLOW + "- Light can pass through block");
 		  			} else {
 		  				sender.sendMessage(ChatColor.GRAY + "- Light can't pass through block");
-		  			}} catch (NullPointerException x) {}
-      		  		try {
-		  			if (passsun.contains("Y")) {
+		  			}
+		  			if (passsun != null && passsun.contains("Y")) {
 		  				sender.sendMessage(ChatColor.YELLOW + "- Sunlight can pass through block");
 		  			} else {
 		  				sender.sendMessage(ChatColor.GRAY + "- Sunlight can't pass through block");
-		  			}} catch (NullPointerException x) {}
-      		  		try {
+		  			}
       		  		if (eeemcs != null) {
 	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Generates max. " + eeemcs + " EMC/s");
 	  				} else {
 	  					sender.sendMessage(ChatColor.GRAY + "- Does not generate EMC");
-	  				}} catch (NullPointerException x) {}
-      		  		try {
+	  				}
 	  				if (eeemcstor != null) {
 	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Stores max. " + eeemcstor + " EMC");
 	  				} else {
 	  					sender.sendMessage(ChatColor.GRAY + "- Does not store EMC");
-	  				}} catch (NullPointerException x) {}
-	  				try {
+	  				}
 	  				if (eeemcbonus != null) {
-	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Gives " + eeemcbonus + " EMC bonus per attached side.");
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Gives " + eeemcbonus + " EMC bonus per attached side");
 	  				} else {
 	  					sender.sendMessage(ChatColor.GRAY + "- Does not give an EMC bonus");
-	  				}} catch (NullPointerException x) {}
-	  				try {
+	  				}
 	      		  	if (eerequireemc != null && eerequireemc.contains("Y")) {
 	      		  		sender.sendMessage(ChatColor.DARK_PURPLE + "- Must operate on EMC");
 	      		  	} else if (eerequireemc != null && eerequireemc.contains("H")) {
 	      		  		sender.sendMessage(ChatColor.DARK_PURPLE + "- Can operate on EMC");
 	      		  	} else {
 		  				sender.sendMessage(ChatColor.GRAY + "- Can not operate on EMC");
-		  			}} catch (NullPointerException x) {}
-	  				try {
+		  			}
 	  				if (storcapacity != null) {
-  		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Item capacity: " + storcapacity);
+  		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Item capacity: " + storcapacity + " stacks");
   		  			} else {
   		  				sender.sendMessage(ChatColor.GRAY + "- Can not store items");
-  		  			}} catch (NullPointerException x) {}
+  		  			}
     		  	}
 				return;
             } catch (Exception x) {}
