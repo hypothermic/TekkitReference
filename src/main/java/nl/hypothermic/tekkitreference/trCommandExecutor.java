@@ -260,7 +260,7 @@ public class trCommandExecutor implements CommandExecutor {
       		  		sender.sendMessage(ChatColor.GREEN + "Mod: " + ChatColor.WHITE + xmod);
       		  		sender.sendMessage(ChatColor.GREEN + "Type: " + ChatColor.WHITE + type);
       		  		sender.sendMessage(ChatColor.GREEN + "Max stack: " + ChatColor.WHITE + maxstack);
-      		  		if (type.toLowerCase().contains("Machine".toLowerCase())) {
+      		  		if (type.contains("Machine")) {
       		  			String xsidein = sidein;
       		  			String xsideout = sideout;
       		  			String xsidepwd = sidepwd;
@@ -299,17 +299,31 @@ public class trCommandExecutor implements CommandExecutor {
       		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Does not use EU");
       		  				}
       		  			}
-      		  		} else if (type.toLowerCase().contains("Collector".toLowerCase())) {
+      		  		} else if (type.contains("Collector")) {
       		  			if (eeemcs != null) {
       		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates max. " + eeemcs + " EMC/s");
       		  			}
-      		  		} else if (type.toLowerCase().contains("Relay".toLowerCase())) {
+      		  		} else if (type.contains("Relay")) {
       		  			if (eeemcstor != null) {
       		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max. " + eeemcstor + " EMC");
       		  			}
       		  			if (eeemcbonus != null) {
       		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Gives " + eeemcbonus + " EMC bonus per attached side.");
       		  			}
+      		  		} else if (type.contains("Furnace")) {
+      		  			String xsidein = sidein;
+  		  				String xsideout = sideout;
+  		  				String xsidepwd = sidepwd;
+  		  				if (xsidein == null || xsidein == "null") {
+  		  					xsidein = "N/A";
+  		  				}
+  		  				if (xsideout == null || xsideout == "null") {
+  		  					xsideout = "N/A";
+  		  				}
+  		  				if (xsidepwd == null || xsidepwd == "null") {
+  		  					xsidepwd = "N/A";
+  		  				}
+      		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + xsidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + xsideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + xsidepwd);
       		  		}
     		  	} else if (xfilter == 1) {
     		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + xemc + " EMC]");
