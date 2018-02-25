@@ -159,7 +159,6 @@ public class trCommandExecutor implements CommandExecutor {
 		final int xfilter = filter;
 		final String xsearchparam = searchparam;
 		final int xcolumn = column;
-		Bukkit.getLogger().info("debug 0");
 		final boolean c = cl.getConfig().getBoolean("mute-console-output");
 		try {
 			if (sqlconn.isClosed()) {
