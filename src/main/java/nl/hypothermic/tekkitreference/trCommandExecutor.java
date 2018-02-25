@@ -159,7 +159,7 @@ public class trCommandExecutor implements CommandExecutor {
 		final int xfilter = filter;
 		final String xsearchparam = searchparam;
 		final int xcolumn = column;
-		final boolean c = cl.getConfig().getBoolean("mute-console-output");
+		final boolean c = !cl.getConfig().getBoolean("mute-console-output");
 		try {
 			if (sqlconn.isClosed()) {
 				if (c) cl.getLogger().info("Connection to MySQL database is closed. Re-connecting...");
@@ -223,6 +223,8 @@ public class trCommandExecutor implements CommandExecutor {
             	String eeemcstor = null;
             	String eeemcbonus = null;
             	String sidefuel = null;
+            	String eerequireemc = null;
+            	String storcapacity = null;
             	while (rs.next()) {
             		name = rs.getString("name");
             		id = rs.getString("id");
@@ -244,6 +246,8 @@ public class trCommandExecutor implements CommandExecutor {
             		eeemcstor = rs.getString("eeemcstor");
             		eeemcbonus = rs.getString("eeemcbonus");
             		sidefuel = rs.getString("sidefuel");
+            		eerequireemc = rs.getString("eerequireemc");
+            		storcapacity = rs.getString("storcapacity");
             	}
             	if (name == null) {
             		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Could not find that item in the database.");
@@ -278,39 +282,39 @@ public class trCommandExecutor implements CommandExecutor {
       		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + xsidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + xsideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + xsidepwd);
       		  			if (xmod.toLowerCase().contains("redpower2")) {
       		  				if (rprequirebt.contains("Y")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Requires blutricity");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Requires blutricity");
       		  				} else if (rprequirebt.contains("G")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates blutricity");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Generates blutricity");
       		  				} else if (rprequirebt.contains("S")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores blutricity");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Stores blutricity");
       		  				} else if (rprequirebt.contains("T")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Transfers blutricity");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Transfers blutricity");
       		  				} else {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Does not use blutricity");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Does not use blutricity");
       		  				}
       		  			} else if (xmod.toLowerCase().contains("industrialcraft2")) {
       		  				if (icrequireeu.contains("Y")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Requires EU");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Requires EU");
       		  				} else if (icrequireeu.contains("G")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates EU");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Generates EU");
       		  				} else if (icrequireeu.contains("S")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max. " + icholdeu + " EU");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Stores max. " + icholdeu + " EU");
       		  				} else if (icrequireeu.contains("T")) {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Transfers EU");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Transfers EU");
       		  				} else {
-      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Does not use EU");
+      		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Does not use EU");
       		  				}
       		  			}
       		  		} else if (type.contains("Collector")) {
       		  			if (eeemcs != null) {
-      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates max. " + eeemcs + " EMC/s");
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Generates max. " + eeemcs + " EMC/s");
       		  			}
       		  		} else if (type.contains("Relay")) {
       		  			if (eeemcstor != null) {
-      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max. " + eeemcstor + " EMC");
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Stores max. " + eeemcstor + " EMC");
       		  			}
       		  			if (eeemcbonus != null) {
-      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Gives " + eeemcbonus + " EMC bonus per attached side.");
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Gives " + eeemcbonus + " EMC bonus per attached side.");
       		  			}
       		  		} else if (type.contains("Furnace")) {
       		  			String xsidein = sidein;
@@ -329,10 +333,32 @@ public class trCommandExecutor implements CommandExecutor {
   		  				if (xsidefuel == null || xsidefuel == "null") {
 		  					xsidefuel = "N/A";
 		  				}
-      		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + xsidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + xsideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + xsidepwd+ ", fuel: " + xsidefuel);
+      		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + xsidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + xsideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + xsidepwd + ChatColor.GREEN + ", fuel: " + ChatColor.WHITE + xsidefuel);
+      		  			try {
+      		  			if (icrequireeu.contains("Y")) {
+		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Requires EU");
+		  				}} catch (NullPointerException x) {}
+      		  			try {
+      		  			if (rprequirebt.contains("Y")) {
+		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Requires blutricity");
+      		  			}} catch (NullPointerException x) {}
+      		  			try {
+      		  				// H = hybrid (can also function on fuel etc), 
+      		  				// Y = yes
+      		  			if (eerequireemc.contains("H")) {
+		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Can operate on EMC");
+      		  			}} catch (NullPointerException x) {}
+      		  		} else if (type.contains("Chest")) {
+      		  			try {
+      		  			if (eerequireemc.contains("H")) {
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Can operate on EMC");
+      		  			}} catch (NullPointerException x) {}
+      		  			if (!storcapacity.isEmpty()) {
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Item capacity: " + storcapacity);
+      		  			}
       		  		}
     		  	} else if (xfilter == 1) {
-    		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + xemc + " EMC]");
+    		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF-ALL] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + xemc + " EMC]");
       		  		sender.sendMessage(ChatColor.GREEN + "Mod: " + ChatColor.WHITE + xmod);
       		  		sender.sendMessage(ChatColor.GREEN + "Type: " + ChatColor.WHITE + type);
       		  		sender.sendMessage(ChatColor.GREEN + "Max stack: " + ChatColor.WHITE + maxstack);
@@ -343,8 +369,14 @@ public class trCommandExecutor implements CommandExecutor {
 	  					sender.sendMessage(ChatColor.GRAY + "Does not accept items. ");
 	  				}} catch (NullPointerException x) {}
       		  		try {
+      		  		if (!sidefuel.isEmpty()) {
+      		  			sender.sendMessage(ChatColor.GREEN + "Fuel input side: " + ChatColor.WHITE + sidein);
+      		  		} else {
+	  					sender.sendMessage(ChatColor.GRAY + "Does not require fuel. ");
+	  				}} catch (NullPointerException x) {}
+      		  		try {
       		  		if (!sideout.isEmpty()) {
-	  					sender.sendMessage(ChatColor.GREEN + "Item outputside : " + ChatColor.WHITE + sideout);
+	  					sender.sendMessage(ChatColor.GREEN + "Item output side : " + ChatColor.WHITE + sideout);
 	  				} else {
 	  					sender.sendMessage(ChatColor.GRAY + "Does not output items. ");
 	  				}} catch (NullPointerException x) {}
@@ -399,26 +431,40 @@ public class trCommandExecutor implements CommandExecutor {
 		  			}} catch (NullPointerException x) {}
       		  		try {
       		  		if (eeemcs != null) {
-	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates max. " + eeemcs + " EMC/s");
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Generates max. " + eeemcs + " EMC/s");
 	  				} else {
-	  					sender.sendMessage(ChatColor.GRAY + "- " + "Does not generate EMC");
+	  					sender.sendMessage(ChatColor.GRAY + "- Does not generate EMC");
 	  				}} catch (NullPointerException x) {}
       		  		try {
 	  				if (eeemcstor != null) {
-	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max. " + eeemcstor + " EMC");
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Stores max. " + eeemcstor + " EMC");
 	  				} else {
-	  					sender.sendMessage(ChatColor.GRAY + "- " + "Does not store EMC");
+	  					sender.sendMessage(ChatColor.GRAY + "- Does not store EMC");
 	  				}} catch (NullPointerException x) {}
 	  				try {
 	  				if (eeemcbonus != null) {
-	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Gives " + eeemcbonus + " EMC bonus per attached side.");
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- Gives " + eeemcbonus + " EMC bonus per attached side.");
 	  				} else {
-	  					sender.sendMessage(ChatColor.GRAY + "- " + "Does not give an EMC bonus");
+	  					sender.sendMessage(ChatColor.GRAY + "- Does not give an EMC bonus");
 	  				}} catch (NullPointerException x) {}
+	  				try {
+	      		  	if (eerequireemc != null && eerequireemc.contains("Y")) {
+	      		  		sender.sendMessage(ChatColor.DARK_PURPLE + "- Must operate on EMC");
+	      		  	} else if (eerequireemc != null && eerequireemc.contains("H")) {
+	      		  		sender.sendMessage(ChatColor.DARK_PURPLE + "- Can operate on EMC");
+	      		  	} else {
+		  				sender.sendMessage(ChatColor.GRAY + "- Can not operate on EMC");
+		  			}} catch (NullPointerException x) {}
+	  				try {
+	  				if (storcapacity != null) {
+  		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- Item capacity: " + storcapacity);
+  		  			} else {
+  		  				sender.sendMessage(ChatColor.GRAY + "- Can not store items");
+  		  			}} catch (NullPointerException x) {}
     		  	}
 				return;
             } catch (Exception x) {}
-		}}).start();
+		}}).start();;
 		return true;
 	}
 }

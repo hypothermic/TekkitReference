@@ -36,7 +36,7 @@ public class trMain extends JavaPlugin {
 	protected Connection connect() {
 		Connection sqlconn;
 		try {
-			if (getConfig().getBoolean("mute-console-output"));
+			if (!getConfig().getBoolean("mute-console-output"))
 			getLogger().info("Connecting to database. This should not take more than 5 seconds. Timeout is 2 minutes.");
 			DriverManager.setLoginTimeout(getConfig().getInt("mysql-connect-timeout"));
 			sqlconn = DriverManager.getConnection("jdbc:mysql://" + getConfig().getString("mysql-server") + "/" + 
