@@ -222,6 +222,7 @@ public class trCommandExecutor implements CommandExecutor {
             	String eeemcs = null;
             	String eeemcstor = null;
             	String eeemcbonus = null;
+            	String sidefuel = null;
             	while (rs.next()) {
             		name = rs.getString("name");
             		id = rs.getString("id");
@@ -242,6 +243,7 @@ public class trCommandExecutor implements CommandExecutor {
             		eeemcs = rs.getString("eeemcs");
             		eeemcstor = rs.getString("eeemcstor");
             		eeemcbonus = rs.getString("eeemcbonus");
+            		sidefuel = rs.getString("sidefuel");
             	}
             	if (name == null) {
             		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Could not find that item in the database.");
@@ -314,6 +316,7 @@ public class trCommandExecutor implements CommandExecutor {
       		  			String xsidein = sidein;
   		  				String xsideout = sideout;
   		  				String xsidepwd = sidepwd;
+  		  				String xsidefuel = sidefuel;
   		  				if (xsidein == null || xsidein == "null") {
   		  					xsidein = "N/A";
   		  				}
@@ -323,6 +326,9 @@ public class trCommandExecutor implements CommandExecutor {
   		  				if (xsidepwd == null || xsidepwd == "null") {
   		  					xsidepwd = "N/A";
   		  				}
+  		  				if (xsidefuel == null || xsidefuel == "null") {
+		  					xsidefuel = "N/A";
+		  				}
       		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + xsidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + xsideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + xsidepwd);
       		  		}
     		  	} else if (xfilter == 1) {
