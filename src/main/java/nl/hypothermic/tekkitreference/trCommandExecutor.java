@@ -329,7 +329,7 @@ public class trCommandExecutor implements CommandExecutor {
   		  				if (xsidefuel == null || xsidefuel == "null") {
 		  					xsidefuel = "N/A";
 		  				}
-      		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + xsidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + xsideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + xsidepwd);
+      		  			sender.sendMessage(ChatColor.GREEN + "Item input: " + ChatColor.WHITE + xsidein + ChatColor.GREEN + ", output: "+ ChatColor.WHITE + xsideout + ChatColor.GREEN + ", power: " + ChatColor.WHITE + xsidepwd+ ", fuel: " + xsidefuel);
       		  		}
     		  	} else if (xfilter == 1) {
     		  		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF] " + ChatColor.RESET + ChatColor.WHITE + name + " (" + id + ")" + ChatColor.BLUE + " [" + xemc + " EMC]");
