@@ -219,6 +219,9 @@ public class trCommandExecutor implements CommandExecutor {
             	String icholdeu = null;
             	String rprequirebt = null;
             	String passsun = null;
+            	String eeemcs = null;
+            	String eeemcstor = null;
+            	String eeemcbonus = null;
             	while (rs.next()) {
             		name = rs.getString("name");
             		id = rs.getString("id");
@@ -236,6 +239,9 @@ public class trCommandExecutor implements CommandExecutor {
             		icholdeu = rs.getString("icholdeu");
             		rprequirebt = rs.getString("rprequirebt");
             		passsun = rs.getString("passsun");
+            		eeemcs = rs.getString("eeemcs");
+            		eeemcstor = rs.getString("eeemcstor");
+            		eeemcbonus = rs.getString("eeemcbonus");
             	}
             	if (name == null) {
             		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "[REF]" + ChatColor.RESET + ChatColor.WHITE + " Could not find that item in the database.");
@@ -292,6 +298,17 @@ public class trCommandExecutor implements CommandExecutor {
       		  				} else {
       		  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Does not use EU");
       		  				}
+      		  			}
+      		  		} else if (type.toLowerCase().contains("Collector".toLowerCase())) {
+      		  			if (eeemcs != null) {
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates max. " + eeemcs + " EMC/s");
+      		  			}
+      		  		} else if (type.toLowerCase().contains("Relay".toLowerCase())) {
+      		  			if (eeemcstor != null) {
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max. " + eeemcstor + " EMC");
+      		  			}
+      		  			if (eeemcbonus != null) {
+      		  				sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Gives " + eeemcbonus + " EMC bonus per attached side.");
       		  			}
       		  		}
     		  	} else if (xfilter == 1) {
@@ -360,6 +377,24 @@ public class trCommandExecutor implements CommandExecutor {
 		  			} else {
 		  				sender.sendMessage(ChatColor.GRAY + "- Sunlight can't pass through block");
 		  			}} catch (NullPointerException x) {}
+      		  		try {
+      		  		if (eeemcs != null) {
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Generates max. " + eeemcs + " EMC/s");
+	  				} else {
+	  					sender.sendMessage(ChatColor.GRAY + "- " + "Does not generate EMC");
+	  				}} catch (NullPointerException x) {}
+      		  		try {
+	  				if (eeemcstor != null) {
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Stores max. " + eeemcstor + " EMC");
+	  				} else {
+	  					sender.sendMessage(ChatColor.GRAY + "- " + "Does not store EMC");
+	  				}} catch (NullPointerException x) {}
+	  				try {
+	  				if (eeemcbonus != null) {
+	  					sender.sendMessage(ChatColor.DARK_PURPLE + "- " + "Gives " + eeemcbonus + " EMC bonus per attached side.");
+	  				} else {
+	  					sender.sendMessage(ChatColor.GRAY + "- " + "Does not give an EMC bonus");
+	  				}} catch (NullPointerException x) {}
     		  	}
 				return;
             } catch (Exception x) {}
