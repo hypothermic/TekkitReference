@@ -34,6 +34,10 @@ You can download the JAR [here](../../releases/).
 5. Reload/restart your server. Check your console if the SQL connection succeeded.
 
 ## Changelog
+**v1.3.0**
+- All EE items have been added to the database.
+- Added parser for EE items.
+
 **v1.2.1**
 - Blacklisted items which Bukkit can't retrieve the item id from.
 
