@@ -34,6 +34,9 @@ You can download the JAR [here](../../releases/).
 5. Reload/restart your server. Check your console if the SQL connection succeeded.
 
 ## Changelog
+**v1.2.1**
+- Blacklisted items which Bukkit can't retrieve the item id from.
+
 **v1.2.0**
 - Fixed search for items without data (ex. 151).
 - Created seperate functionn for connecting to DB.
