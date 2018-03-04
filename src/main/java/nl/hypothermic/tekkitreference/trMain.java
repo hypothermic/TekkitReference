@@ -27,6 +27,7 @@ public class trMain extends JavaPlugin {
 	
 	/********************************\
 	* TekkitReference by Hypothermic *
+	*    UNRELEASED BETA VERSION     *
 	*           trMain.java          *
 	*   www.github.com/hypothermic   *
 	*      admin@hypothermic.nl      *
@@ -54,21 +55,8 @@ public class trMain extends JavaPlugin {
 	}
 	
 	@Override public void onEnable() {
-		loadVer();
-		try {
-			boolean xs = new File(getDataFolder().getPath() + File.separator + "config.yml").exists();
-			defconfig(getConfig(), !xs);
-		} catch (IOException e1) {
-			getLogger().severe("Could not write config file correctly.");
-			e1.printStackTrace();
-		}
-		Connection sqlconn = connect();
-		if (sqlconn == null) {
-			return;
-		}
-		this.getCommand("ref").setExecutor(new trCommandExecutor(this, sqlconn, v));
-		this.getCommand("docs").setExecutor(new trCommandExecutor(this, sqlconn,v));
-		getLogger().info("TekkitReference " + v + " has been enabled.");
+		getLogger().info("Starting connect thread...");
+		new trConnectionThread(this).start();
 	}
 
 	@Override public void onDisable() {
@@ -112,7 +100,7 @@ public class trMain extends JavaPlugin {
 	    }
 	}
 	
-	public void loadVer() {
+	public String loadVer() {
 		try {
 			v = this.getDescription().getVersion();
 		} catch (Exception x) {
@@ -121,6 +109,7 @@ public class trMain extends JavaPlugin {
 		if (v == null) {
 			v = "[unknown]";
 		}
+		return v;
 	}
 	
     public void error(String message) {

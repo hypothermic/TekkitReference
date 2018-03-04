@@ -26,6 +26,7 @@ public class trCommandExecutor implements CommandExecutor {
 	
 	/********************************\
 	* TekkitReference by Hypothermic *
+	*    UNRELEASED BETA VERSION     *
 	*     trCommandExecutor.java     *
 	*   www.github.com/hypothermic   *
 	*      admin@hypothermic.nl      *
